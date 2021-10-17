@@ -6,7 +6,7 @@ So the root node of the heap is the first element which is followed by the it's 
 children respectively and so on for all the other nodes. To implement this we need to define a
 relationship between the 'index' of a node and the 'index of it's parent', 'index of it's left child' and
 'index of it's right child'. The relationship is given as:
-1: index of parent = index/2 - 1
+1: index of parent = (index-1)/2
 2: index of left child: 2*index + 1
 3: index of right child: 2*index + 2
 
@@ -14,7 +14,7 @@ Here we implement a wrapper class around an array(vector) to implement a MinHeap
 */
 #include <iostream>
 #include <vector>
-
+#include <bits/stdc++.h>
 
 class MinHeap{
     private:
@@ -25,7 +25,7 @@ class MinHeap{
     // Utility functions
     int getLeftChildIndex(int parentIndex){return (2*parentIndex+1);}
     int getRightChildIndex(int parentIndex){return (2*parentIndex+2);}
-    int getParentIndex(int childIndex){return (childIndex/2 - 1);}
+    int getParentIndex(int childIndex){return ((childIndex-1)/2);}
     bool hasLeftChild(int parentIndex){return getLeftChildIndex(parentIndex) < array.size();}
     bool hasRightChild(int parentIndex){return getRightChildIndex(parentIndex) < array.size();}
     bool hasParent(int childIndex){return getParentIndex(childIndex) >= 0;}
@@ -37,7 +37,7 @@ class MinHeap{
    
     MinHeap()
     {
-        array = std::vector<int>(capacity,0);
+        array = std::vector<int>(capacity,1000);
     }
 
 
@@ -85,7 +85,7 @@ class MinHeap{
     // getMin: Return the top of the heap and reheapify.
     int getMin()
     {
-        if(array.empty()) return -100;
+        if(size == 0) return -100;
         int top = array[0];
         array[0] = array[size-1];
         size--;
@@ -115,14 +115,19 @@ int main(int argc, char const *argv[])
     obj.add(10);
     obj.add(15);
     obj.add(20);
-    std::cout<<obj.peek()<<std::endl;
+   
     std::cout<<obj.getMin()<<std::endl;
-    std::cout<<obj.peek()<<std::endl;
+
     std::cout<<obj.getMin()<<std::endl;
-    std::cout<<obj.peek()<<std::endl;
+ 
     std::cout<<obj.getMin()<<std::endl;
+
     obj.add(0);
-    std::cout<<obj.peek()<<std::endl;
+  
+    std::cout<<obj.getMin()<<std::endl;
+   
+    std::cout<<obj.getMin()<<std::endl;
+
     std::cout<<obj.getMin()<<std::endl;
     return 0;
 }
