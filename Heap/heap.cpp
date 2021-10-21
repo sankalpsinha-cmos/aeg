@@ -12,122 +12,167 @@ relationship between the 'index' of a node and the 'index of it's parent', 'inde
 
 Here we implement a wrapper class around an array(vector) to implement a MinHeap.
 */
+
 #include <iostream>
 #include <vector>
-#include <bits/stdc++.h>
+#include <climits>
 
 class MinHeap{
     private:
-    int size = 0;
-    int capacity = 10;
+    int capacity;
+    int size;
     std::vector<int> array;
 
-    // Utility functions
-    int getLeftChildIndex(int parentIndex){return (2*parentIndex+1);}
-    int getRightChildIndex(int parentIndex){return (2*parentIndex+2);}
-    int getParentIndex(int childIndex){return ((childIndex-1)/2);}
-    bool hasLeftChild(int parentIndex){return getLeftChildIndex(parentIndex) < array.size();}
-    bool hasRightChild(int parentIndex){return getRightChildIndex(parentIndex) < array.size();}
-    bool hasParent(int childIndex){return getParentIndex(childIndex) >= 0;}
-    int getLeftChild(int parentIndex){return array[getLeftChildIndex(parentIndex)];}
-    int getRightChild(int parentIndex){return array[getRightChildIndex(parentIndex)];}
-    int getParent(int childIndex){return array[getParentIndex(childIndex)];}
 
-    public:
+    // Heap Utility functions
+    bool hasLeftChild(int parentIdx){return (2*parentIdx + 1 < array.size());}
+    bool hasRightChild(int parentIdx){return (2*parentIdx + 2 < array.size());}
+    bool hasParent(int childIdx){ return ((childIdx-1)/2 >=0 );}
+    int getLeftChildIdx(int parentIdx){ return (2*parentIdx + 1);}
+    int getRightChildIdx(int parentIdx){ return (2*parentIdx + 2);}
+    int getParentIdx(int childIdx){ return ((childIdx-1)/2);}
+    int getLeftChild(int parentIdx){ return array[getLeftChildIdx(parentIdx)];}
+    int getRightChild(int parentIdx){ return array[getLeftChildIdx(parentIdx)];}
+    int getParent(int childIdx){ return array[getParentIdx(childIdx)];}
+
+    /* 
+    ensureExtraCapacity: If we run out of heap space then this function makes a new heap of 2*size as before and
+    copies the old heap onto the new heap, so that we can add a new element.
+    */
+
+
+   void ensureExtraCapacity()
+   {
+       if(size == capacity)
+       {
+        std::vector<int> new_array(2*capacity,INT_MAX);
+        std::copy(array.begin(), array.end(), new_array.begin());
+        capacity = 2*capacity;
+        array = new_array;
+       }
+   }
    
-    MinHeap()
+   
+   // heapifyUp: Move a newly inserted element to its correct position in the heap
+   void heapifyUp()
+   {
+       int index = size - 1;
+       while(hasParent(index) && array[index] < getParent(index))
+       {
+           std::swap(array[index], array[getParentIdx(index)]);
+           index = getParentIdx(index);  
+       }
+   }
+
+
+   // heapifyDown: Move the newly replaced top element in the getMin function to its right position
+   void heapifyDown()
+   {
+       int index = 0;
+       int smallestChildIdx = getLeftChildIdx(index);
+       while(hasLeftChild(index))
+       {
+           smallestChildIdx = getRightChild(index) < getLeftChildIdx(index) ? getRightChildIdx(index) : getLeftChildIdx(index);
+           if(array[smallestChildIdx] < array[index])
+           {
+               std::swap(array[index],array[smallestChildIdx]);
+               index = smallestChildIdx;
+           }
+           else break;
+       }
+   }
+
+    
+    public:
+    // Constructor
+    MinHeap(int capacity = 0)
     {
-        array = std::vector<int>(capacity,1000);
+        size = 0;
+        capacity = capacity;
+        array = std::vector<int>(capacity,INT_MAX);
     }
 
-
-    // heapifyUp: Bubble up the value in the heap to it's right position
-    void heapifyUp()
+    // Constructor when an array is passed as input
+    MinHeap(std::vector<int> inputArray)
     {
-        int index = size - 1;
-        while(hasParent(index) && getParent(index) > array[index])
+        capacity = inputArray.size();
+        size = inputArray.size();
+        array = inputArray;
+        int lnln = array.size()/2 -1;
+        for(int i = lnln; i >= 0; i--)
         {
-            std::swap(array[index], array[getParentIndex(index)]);
-            index = getParentIndex(index);
-        }
-    }
-
-
-    // heapifyDown: Bubble down the value to it's right position
-    void heapifyDown()
-    {
-        int index = 0;
-        while(hasLeftChild(index) == true)
-        {
-            int smallestChildIdx = getLeftChildIndex(index);
-            if(hasRightChild(index) && getRightChild(index) < getLeftChild(index)) smallestChildIdx = getRightChildIndex(index);
-            if(array[index] > array[smallestChildIdx])
+            int index = i;
+            while(2*index+1 < array.size())
             {
-                std::swap(array[index], array[smallestChildIdx]);
-                index = smallestChildIdx;
+                int leftChildIdx = 2*index + 1;
+                int rightChildIdx = 2*index + 2;
+                int smallestIdx = index;
+                if(leftChildIdx < array.size() && array[leftChildIdx] < array[smallestIdx]) smallestIdx = leftChildIdx;
+                if(rightChildIdx < array.size() && array[rightChildIdx] < array[smallestIdx]) smallestIdx = rightChildIdx;
+                if(smallestIdx != index)
+                {
+                    std::swap(array[smallestIdx], array[index]);
+                    index = smallestIdx;
+                }
+                if(smallestIdx == index) break;
             }
-            else break;
         }
     }
 
 
-    // Peek: Return the top of the MinHeap. Note: The heap is NOT modifed.
+    // printer: Utility function to print the heap
+    void printer()
+    {
+        if(array.empty())
+        {
+            std::cout<<"EMPTY"<<std::endl;
+        }
+        else
+        {
+            for(auto itr = array.begin(); itr != array.end(); itr++)
+            {
+                std::cout<<*itr<<" ";
+            }
+            std::cout<<std::endl;
+        }
+    }
+
+
+    // peek: Return the element at the top of the heap
     int peek()
     {
-        // Sanity Check: Empty Heap
-        if(array.empty()) return -100;
-        // Return the top of the Heap
-        std::cout<<"Peeking Top of Heap"<<std::endl;
-        return array[0];
+        return size == 0 ? INT_MAX : array[0];
     }
 
 
-    // getMin: Return the top of the heap and reheapify.
+    // push: Add an input element onto the heap
+    void push(int element)
+    {
+        ensureExtraCapacity();
+        array[size] = element;
+        size++;
+        heapifyUp();
+    }
+
+
+    // getMin: Get the min of the Heap
     int getMin()
     {
-        if(size == 0) return -100;
+        if(size == 0) return INT_MAX;
         int top = array[0];
         array[0] = array[size-1];
         size--;
         heapifyDown();
-        std::cout<<"Returning Top of Heap"<<std::endl;
         return top;
-    }
-
-
-    // add: Add a new value to the heap
-    void add(int value)
-    {
-        array[size] = value;
-        size++;
-        heapifyUp();
     }
 };
 
-int main(int argc, char const *argv[])
+int main(int argc, const char *argv[])
 {
-    MinHeap obj;
-    obj.add(3);
-    obj.add(4);
-    obj.add(8);
-    obj.add(9);
-    obj.add(7);
-    obj.add(10);
-    obj.add(15);
-    obj.add(20);
-   
-    std::cout<<obj.getMin()<<std::endl;
-
-    std::cout<<obj.getMin()<<std::endl;
- 
-    std::cout<<obj.getMin()<<std::endl;
-
-    obj.add(0);
-  
-    std::cout<<obj.getMin()<<std::endl;
-   
-    std::cout<<obj.getMin()<<std::endl;
-
-    std::cout<<obj.getMin()<<std::endl;
+    std::vector<int> a{15,20,10,17};
+    MinHeap h(a);
+    std::cout<<h.peek()<<std::endl;
+    std::cout<<h.getMin()<<std::endl;
+    std::cout<<h.peek()<<std::endl;
     return 0;
 }
